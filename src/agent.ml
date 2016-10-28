@@ -64,27 +64,27 @@ let update_agent uri agent (response,body) =
 
 let get uri agent =
   Client.get ~headers:agent.client_headers uri
-  >>= update_agent uri agent |> Lwt_main.run
+  >>= update_agent uri agent
 
 let load image agent =
   let page = agent.last_page in
   let uri = image |> Page.Image.uri in
-  let agent = uri |> Client.get ~headers:agent.client_headers
-  >>= update_agent uri agent |> Lwt_main.run in
-  {agent with last_page = page}
+  uri |> Client.get ~headers:agent.client_headers
+  >>= update_agent uri agent
+  >|= fun agent -> {agent with last_page = page}
 
 let click link = link |> Page.Link.uri |> get
 
 let post uri content agent =
   Client.post ~headers:agent.client_headers
     ~body:(Cohttp_lwt_body.of_string content) uri
-  >>= update_agent uri agent |> Lwt_main.run
+  >>= update_agent uri agent
 
 let submit form agent =
   let uri = raise (Failure "not implemented") in
   let params = Page.Form.raw_values form in
   Client.post_form ~headers:agent.client_headers ~params:params uri
-  >>= update_agent uri agent |> Lwt_main.run
+  >>= update_agent uri agent
 
 let page agent = agent.last_page
 let content agent = agent.last_body

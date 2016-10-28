@@ -169,6 +169,7 @@ Page	_build/src/page.ml	1;"	M
 Page	_build/src/page.mli	1;"	M
 Page	src/page.ml	1;"	M
 Page	src/page.mli	1;"	M
+PageElement	test/test.ml	1;"	M
 Para	setup.ml	/^    | Para of string$/;"	C	type:OASISText/elt
 PropList	setup.ml	1;"	M
 RadioButton	_build/src/page.ml	1;"	M
@@ -558,13 +559,11 @@ hash	setup.ml	/^         let hash s = Hashtbl.hash (OASISString.lowercase_ascii 
 hd_opt	_build/src/page.ml	/^let hd_opt = function$/;"	v
 hd_opt	src/page.ml	/^let hd_opt = function$/;"	v
 header	setup.ml	/^    let header, byte, native, c_object, f =$/;"	v
-header_nodomain	_build/test/test.ml	/^      let header_nodomain = $/;"	v
-header_nodomain	test/test.ml	/^      let header_nodomain = $/;"	v
-headers	_build/test/test.ml	/^      let headers =$/;"	v
+header_nodomain	_build/test/test.ml	/^      let header_nodomain =$/;"	v
+header_nodomain	test/test.ml	/^      let header_nodomain =$/;"	v
 headers	setup.ml	/^    let headers =$/;"	v
-headers	test/test.ml	/^      let headers =$/;"	v
-headers_mult	_build/test/test.ml	/^      let headers_mult = $/;"	v
-headers_mult	test/test.ml	/^      let headers_mult = $/;"	v
+headers_mult	_build/test/test.ml	/^      let headers_mult =$/;"	v
+headers_mult	test/test.ml	/^      let headers_mult =$/;"	v
 help	setup.ml	/^    let help =$/;"	v
 hidden_with	src/page.ml	/^  let hidden_with selector f =$/;"	v
 hiddens	src/page.ml	/^  let hiddens = hiddens_with ""$/;"	v
@@ -610,6 +609,8 @@ input	setup.ml	/^      method input: Buffer.t -> int -> unit$/;"	m	class:OASISFi
 input	src/page.ml	/^  type _ input = elt$/;"	t	Module:Form
 input_filter	_build/src/page.ml	/^let input_filter input_type node =$/;"	v
 input_filter	src/page.ml	/^let input_filter input_type node =$/;"	v
+input_to_node	src/page.ml	/^  let input_to_node i = i $/;"	v	Module:Form
+input_to_nodes	src/page.ml	/^  let input_to_nodes is = is $/;"	v	Module:Form
 inputs	src/page.ml	/^  type _ inputs = Soup.element Soup.nodes$/;"	t	Module:Form
 install	setup.ml	/^          install:          std_args_fun;$/;"	r	type:BaseCompat/Compat_0_4/BaseSetup/t
 install	setup.ml	/^      install:          std_args_fun;$/;"	r	type:BaseSetup/t
@@ -650,8 +651,8 @@ iter	src/cookiejar.mli	/^val iter : (Cookie.t -> unit) -> t -> unit$/;"	v
 iter	src/page.ml	/^  let iter = Soup.iter$/;"	v	Module:Form
 jar_eq	_build/test/test.ml	/^let rec jar_eq cookies jar =$/;"	v
 jar_eq	test/test.ml	/^let rec jar_eq cookies jar =$/;"	v
-jar_from	_build/test/test.ml	/^let jar_from = $/;"	v
-jar_from	test/test.ml	/^let jar_from = $/;"	v
+jar_from	_build/test/test.ml	/^let jar_from =$/;"	v
+jar_from	test/test.ml	/^let jar_from =$/;"	v
 join_plugin_sections	setup.ml	/^  let join_plugin_sections filter_map lst =$/;"	v
 key	src/cookiejar.ml	/^  let key c =$/;"	v	Module:Key
 keygen_with	src/page.ml	/^  let keygen_with selector f =$/;"	v
@@ -808,6 +809,7 @@ package_version	setup.ml	/^  let package_version pkg =$/;"	v
 page	_build/src/agent.mli	/^val page : t -> Page.t option$/;"	v
 page	src/agent.ml	/^let page agent = agent.last_page$/;"	v
 page	src/agent.mli	/^val page : t -> Page.t option$/;"	v
+page	test/test.ml	/^let page : string -> string =$/;"	v
 parse	setup.ml	/^      let parse =$/;"	v
 parse	setup.ml	/^      let parse s =$/;"	v
 parse	setup.ml	/^  let parse argv args =$/;"	v	Module:BaseArgExt
@@ -856,8 +858,8 @@ radio_buttons	src/page.ml	/^  let radio_buttons = radio_buttons_with ""$/;"	v
 radio_buttons_with	src/page.ml	/^  let radio_buttons_with selector f =$/;"	v
 random_char	_build/test/test.ml	/^let random_char () =$/;"	v
 random_char	test/test.ml	/^let random_char () =$/;"	v
-random_cookie	_build/test/test.ml	/^let random_cookie domain = $/;"	v
-random_cookie	test/test.ml	/^let random_cookie domain = $/;"	v
+random_cookie	_build/test/test.ml	/^let random_cookie domain =$/;"	v
+random_cookie	test/test.ml	/^let random_cookie domain =$/;"	v
 random_string	_build/test/test.ml	/^let random_string n =$/;"	v
 random_string	test/test.ml	/^let random_string n =$/;"	v
 raw_get	src/page.ml	/^  let raw_get key f = StringMap.find key f.data$/;"	v	Module:Form
@@ -994,7 +996,6 @@ submit	_build/src/agent.mli	/^val submit : Page.Form.t -> t -> t Lwt.t$/;"	v
 submit	src/agent.ml	/^let submit form agent =$/;"	v
 submit	src/agent.mli	/^val submit : Page.Form.t -> t -> t Lwt.t$/;"	v
 suites	_build/test/test.ml	/^let suites = [$/;"	v
-suites	test/test.ml	/^let suites = [$/;"	v
 t	_build/src/agent.ml	/^type t = {$/;"	t
 t	_build/src/agent.mli	/^type t$/;"	t
 t	_build/src/cookiejar.mli	/^type t$/;"	t
@@ -1039,6 +1040,7 @@ test	setup.ml	/^          test:             ((test, float) section_args_fun) lis
 test	setup.ml	/^      test:             ((test, float) section_args_fun) list;$/;"	r	type:BaseSetup/t
 test	setup.ml	/^  let test ~ctxt lst pkg extra_args =$/;"	v	Module:BaseTest
 test	setup.ml	/^  type test = string$/;"	t	Module:OASISExpr
+test_selector	test/test.ml	/^let test_selector page f (module M : PageElement) node prefix selector expected_count =$/;"	v
 text	src/page.ml	/^  let text = Soup.leaf_text$/;"	v	Module:Frame
 text	src/page.ml	/^  let text = Soup.leaf_text$/;"	v	Module:Link
 text_in	setup.ml	/^    let text_in = Open_text :: default_in$/;"	v	Module:OASISFileSystem/fs#string_of_filename/open_out/open_in/Mode
@@ -1057,11 +1059,10 @@ to_list	setup.ml	/^      let to_list = elements$/;"	v	Module:OASISUtils/Make
 to_list	setup.ml	/^      let to_list t = fold (fun k v acc -> (k, v) :: acc) t []$/;"	v	Module:OASISUtils/MapExt/Make
 to_list	setup.ml	/^      val to_list: 'a t -> (key * 'a) list$/;"	v	Module:OASISUtils/MapExt/S
 to_list	src/page.ml	/^  let to_list = Soup.to_list$/;"	v	Module:Form
+to_node	src/page.ml	/^  let to_node f = f $/;"	v	Module:Form
 to_node	src/page.ml	/^  let to_node frame = frame$/;"	v	Module:Frame
 to_node	src/page.ml	/^  let to_node image = image$/;"	v	Module:Image
 to_node	src/page.ml	/^  let to_node link = link$/;"	v
-to_node	src/page.ml	/^  let to_node n = n$/;"	v	Module:Form
-to_nodes	src/page.ml	/^  let to_nodes n = n$/;"	v	Module:Form
 to_soup	_build/src/page.mli	/^val to_soup : t -> Soup.soup Soup.node$/;"	v
 to_soup	src/page.mli	/^val to_soup : t -> Soup.soup Soup.node$/;"	v
 to_string	setup.ml	/^  let to_string t =$/;"	v

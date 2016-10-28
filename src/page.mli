@@ -33,8 +33,9 @@ module Form : sig
   type _ input
   type _ inputs
 
-  val to_node : _ input -> Soup.element Soup.node
-  val to_nodes : _ inputs -> Soup.element Soup.nodes
+  val to_node : t -> Soup.element Soup.node
+  val input_to_node : _ input -> Soup.element Soup.node
+  val input_to_nodes : _ inputs -> Soup.element Soup.nodes
 
   val to_list : 'a inputs -> 'a input list
   val iter : ('a input -> unit) -> 'a inputs -> unit

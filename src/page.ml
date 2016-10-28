@@ -59,8 +59,9 @@ module Form = struct
   type _ input = elt
   type _ inputs = Soup.element Soup.nodes
 
-  let to_node n = n
-  let to_nodes n = n
+  let to_node f = f 
+  let input_to_node i = i 
+  let input_to_nodes is = is 
 
   let to_list = Soup.to_list
   let iter = Soup.iter
