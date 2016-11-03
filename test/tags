@@ -18,11 +18,14 @@ headers_mult	test.ml	/^      let headers_mult =$/;"	v
 jar_eq	test.ml	/^let rec jar_eq cookies jar =$/;"	v
 jar_from	test.ml	/^let jar_from =$/;"	v
 name	test.ml	/^      let name = Cookiejar.Cookie.name cookie in$/;"	v
-page	test.ml	/^let page : string -> string =$/;"	v
+nodes	test.ml	/^  let nodes = f selector page in$/;"	v
 path	test.ml	/^  let path = random_string (between 5 10) in$/;"	v
 random_char	test.ml	/^let random_char () =$/;"	v
 random_cookie	test.ml	/^let random_cookie domain =$/;"	v
 random_string	test.ml	/^let random_string n =$/;"	v
+soup_index	test.ml	/^let soup_index =$/;"	v
+suite_cookiejar	test.ml	/^let suite_cookiejar = [$/;"	v
 t	test.ml	/^  type t$/;"	t	Module:PageElement
-test_selector	test.ml	/^let test_selector page f (module M : PageElement) node prefix selector expected_count =$/;"	v
+t	test.ml	/^let test_selector (type s) page f (module M : PageElement with type t = s) node prefix selector expected_count =$/;"	t
+test_selector	test.ml	/^let test_selector (type s) page f (module M : PageElement with type t = s) node prefix selector expected_count =$/;"	v
 to_node	test.ml	/^  val to_node : t -> Soup.element Soup.node$/;"	v	Module:PageElement

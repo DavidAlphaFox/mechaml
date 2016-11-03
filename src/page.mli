@@ -180,17 +180,17 @@ val form_with : string -> t -> Form.t option
 val forms_with : string -> t -> Form.t list
 val forms : t -> Form.t list
 
-val link_with : string -> t -> Image.t option
-val links_with : string -> t -> Image.t list
-val links : t -> Image.t list
+val link_with : string -> t -> Link.t option
+val links_with : string -> t -> Link.t list
+val links : t -> Link.t list
 
 val image_with : string -> t -> Image.t option
 val images_with : string -> t -> Image.t list
 val images : t -> Image.t list
 
-val frame_with : string -> t -> Image.t option
-val frames_with : string -> t -> Image.t list
-val frames : t -> Image.t list
+val frame_with : string -> t -> Frame.t option
+val frames_with : string -> t -> Frame.t list
+val frames : t -> Frame.t list
 
 val to_soup : t -> Soup.soup Soup.node
 val from_soup : Soup.soup Soup.node -> t

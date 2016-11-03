@@ -38,6 +38,7 @@ let input_filter input_type node =
 
 let tag_selector tag = function
   | "" -> tag
+  | s when s.[0]='*' -> s
   | s when is_identifier_char s.[0] -> s
   | s -> tag^s
 
@@ -59,7 +60,7 @@ module Form = struct
   type _ input = elt
   type _ inputs = Soup.element Soup.nodes
 
-  let to_node f = f 
+  let to_node f = f.form
   let input_to_node i = i 
   let input_to_nodes is = is 
 
