@@ -25,10 +25,10 @@ Executable "unit_tests"
   Build$: flag(tests)
   Path: test
   MainIs: test.ml
-  BuildDepends: oUnit, mechaml
+  BuildDepends: alcotest, mechaml
 
 Test "unit"
-  Command: $unit_tests -runner sequential
+  Command: $unit_tests
   WorkingDirectory: test
 
 SourceRepository "master"

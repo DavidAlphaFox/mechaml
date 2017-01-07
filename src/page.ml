@@ -197,8 +197,24 @@ module Form = struct
     with Not_found -> false
 
   module Checkbox = struct
+    let cb_selector name = Printf.sprintf "[type=checkbox][name=%s]" name
+
+    let _value = value
+
+    let value cb = _value cb |> Soup.require
+
+    let choices f cb =
+      name cb >|= cb_selector >|= (fun s ->
+        Soup.select s f.form) |> Soup.require
+
+    let values f cb =
+      choices f cb |> fold (fun l cb ->
+        match _value cb with
+          | Some v -> v::l
+          | None -> l) []
+
     let check f cb =
-      (name cb, value cb >|= singleton) >>> radd f.data
+      (name cb, _value cb >|= singleton) >>> radd f.data
       |> update_form f
 
     let uncheck f cb =
@@ -209,27 +225,28 @@ module Form = struct
   end
 
   module RadioButton = struct
-    let rb_selector id = Printf.sprintf "[type=radio]#%s" id
+    let rb_selector name = Printf.sprintf "[type=radio][name=%s]" name
 
     let _value = value
 
     let value rb = _value rb |> Soup.require
 
+    let choices f rb =
+      name rb >|= rb_selector >|= (fun s ->
+        Soup.select s f.form) |> Soup.require
+
     let values f rb =
-      name rb >|= rb_selector >|=
-      (fun s -> Soup.select s f.form
-        |> to_list) |? []
+      choices f rb |> fold (fun l cb ->
+        match _value cb with
+          | Some v -> v::l
+          | None -> l) []
 
     let select f rb =
       (name rb, _value rb >|= singleton) >>> radd f.data
       |> update_form f
 
-    let is_selected f rb =
-      _value rb >|=
-      (fun v -> values f rb
-        |> List.exists (fun x -> (_value x |? "") = v))
-      |? false
-
+    let is_selected f rb = failwith "not implemented"
+ 
     let to_string item = item >|= _value |> Soup.require
   end
 

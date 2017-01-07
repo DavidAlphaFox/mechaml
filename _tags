@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: ff4fa6da17b3404763466be658dee890)
+# DO NOT EDIT (digest: 80c95385f2cc3443358eb272781df118)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -26,18 +26,18 @@ true: annot, bin_annot
 <src/*.ml{,i,y}>: pkg_lwt
 <src/*.ml{,i,y}>: pkg_uri
 # Executable unit_tests
+"test/test.byte": pkg_alcotest
 "test/test.byte": pkg_cohttp
 "test/test.byte": pkg_cohttp.lwt
 "test/test.byte": pkg_lambdasoup
 "test/test.byte": pkg_lwt
-"test/test.byte": pkg_oUnit
 "test/test.byte": pkg_uri
 "test/test.byte": use_mechaml
+<test/*.ml{,i,y}>: pkg_alcotest
 <test/*.ml{,i,y}>: pkg_cohttp
 <test/*.ml{,i,y}>: pkg_cohttp.lwt
 <test/*.ml{,i,y}>: pkg_lambdasoup
 <test/*.ml{,i,y}>: pkg_lwt
-<test/*.ml{,i,y}>: pkg_oUnit
 <test/*.ml{,i,y}>: pkg_uri
 <test/*.ml{,i,y}>: use_mechaml
 # OASIS_STOP

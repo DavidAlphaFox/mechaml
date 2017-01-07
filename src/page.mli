@@ -97,6 +97,10 @@ module Form : sig
   val reset : t -> t
 
   module Checkbox : sig
+    val value : checkbox input -> string
+    val values : t -> checkbox input -> string list
+    val choices : t -> checkbox input -> checkbox inputs
+
     val check : t -> checkbox input -> t
     val uncheck : t -> checkbox input -> t
     val is_checked : t -> checkbox input -> bool
@@ -104,7 +108,9 @@ module Form : sig
 
   module RadioButton : sig
     val value : radio_button input -> string
-    val values : t -> radio_button input -> radio_button input list 
+    val values : t -> radio_button input -> string list
+    val choices : t -> radio_button input -> radio_button inputs 
+
     val select : t -> radio_button input -> t
     val is_selected : t -> radio_button input -> bool
   end

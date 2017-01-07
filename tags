@@ -275,11 +275,21 @@ c	src/cookiejar.ml	/^      Printf.bprintf buffer "%s%s=%s" sep (Cookie.name c) (
 capitalize_ascii	myocamlbuild.ml	/^  let capitalize_ascii s =$/;"	v
 capitalize_ascii	setup.ml	/^  let capitalize_ascii s =$/;"	v
 capitalize_file	setup.ml	/^  let capitalize_file f =$/;"	v
-cb	src/page.ml	/^      (name cb, value cb >|= singleton) >>> radd f.data$/;"	v	Module:Checkbox
+cb	src/page.ml	/^        match _value cb with$/;"	v	Module:Checkbox
+cb	src/page.ml	/^        match _value cb with$/;"	v	Module:RadioButton
+cb	src/page.ml	/^      (name cb, _value cb >|= singleton) >>> radd f.data$/;"	v	Module:Checkbox
+cb	src/page.ml	/^    let value cb = _value cb |> Soup.require$/;"	v	Module:Checkbox
+cb_selector	src/page.ml	/^    let cb_selector name = Printf.sprintf "[type=checkbox][name=%s]" name$/;"	v	Module:Checkbox
 check	src/page.ml	/^    let check f cb =$/;"	v	Module:Checkbox
 check_and_register	setup.ml	/^    let check_and_register (bt, bnm, lst) =$/;"	v
 check_feature	setup.ml	/^    let check_feature features stage =$/;"	v
+check_int	_build/test/test.ml	/^let check_int = Alcotest.(check int)$/;"	v
+check_int	test/test.ml	/^let check_int = Alcotest.(check int)$/;"	v
+check_string	_build/test/test.ml	/^let check_string = Alcotest.(check string)$/;"	v
+check_string	test/test.ml	/^let check_string = Alcotest.(check string)$/;"	v
 check_tools	setup.ml	/^    let check_tools lst =$/;"	v
+check_true	_build/test/test.ml	/^let check_true msg = Alcotest.(check bool) msg true$/;"	v
+check_true	test/test.ml	/^let check_true msg = Alcotest.(check bool) msg true$/;"	v
 checkbox	src/page.ml	/^  type checkbox$/;"	t	Module:Form
 checkbox_with	src/page.ml	/^  let checkbox_with selector f =$/;"	v
 checkboxes	src/page.ml	/^  let checkboxes = checkboxes_with ""$/;"	v
@@ -348,19 +358,19 @@ configure	setup.ml	/^  let configure ~ctxt:_ pkg argv =$/;"	v	Module:InternalCon
 content	_build/src/agent.mli	/^val content : t -> string$/;"	v
 content	src/agent.ml	/^let content agent = agent.last_body$/;"	v
 content	src/agent.mli	/^val content : t -> string$/;"	v
-cookie	_build/test/test.ml	/^      let cookie = random_cookie (Uri.host uri |? "dunno.com") in$/;"	v
-cookie	_build/test/test.ml	/^      let value = Cookiejar.Cookie.value cookie in$/;"	v
+cookie	_build/test/test.ml	/^    let cookie = random_cookie (Uri.host uri |? "dunno.com") in$/;"	v
+cookie	_build/test/test.ml	/^    let value = Cookiejar.Cookie.value cookie in$/;"	v
 cookie	_build/test/test.ml	/^  let value = Cookiejar.Cookie.value cookie in$/;"	v
-cookie	test/test.ml	/^      let cookie = random_cookie (Uri.host uri |? "dunno.com") in$/;"	v
-cookie	test/test.ml	/^      let value = Cookiejar.Cookie.value cookie in$/;"	v
+cookie	test/test.ml	/^    let cookie = random_cookie (Uri.host uri |? "dunno.com") in$/;"	v
+cookie	test/test.ml	/^    let value = Cookiejar.Cookie.value cookie in$/;"	v
 cookie	test/test.ml	/^  let value = Cookiejar.Cookie.value cookie in$/;"	v
 cookie_jar	_build/src/agent.ml	/^  cookie_jar : Cookiejar.t;$/;"	r	type:t
 cookie_jar	_build/src/agent.mli	/^val cookie_jar : t -> Cookiejar.t$/;"	v
 cookie_jar	src/agent.ml	/^  cookie_jar : Cookiejar.t;$/;"	r	type:t
 cookie_jar	src/agent.ml	/^let cookie_jar agent = agent.cookie_jar$/;"	v
 cookie_jar	src/agent.mli	/^val cookie_jar : t -> Cookiejar.t$/;"	v
-cookie_uri	_build/test/test.ml	/^      let cookie_uri = Printf.sprintf "http:\/\/%s\/a.php" domain$/;"	v
-cookie_uri	test/test.ml	/^      let cookie_uri = Printf.sprintf "http:\/\/%s\/a.php" domain$/;"	v
+cookie_uri	_build/test/test.ml	/^    let cookie_uri = Printf.sprintf "http:\/\/%s\/a.php" domain$/;"	v
+cookie_uri	test/test.ml	/^    let cookie_uri = Printf.sprintf "http:\/\/%s\/a.php" domain$/;"	v
 cp	setup.ml	/^  let cp ~ctxt ?(recurse=false) src tgt =$/;"	v
 create	setup.ml	/^    let create () =$/;"	v	Module:PropList/Data
 create	setup.ml	/^    let create ?(case_insensitive=false) nm =$/;"	v	Module:PropList/Schema
@@ -368,7 +378,7 @@ create	setup.ml	/^    let create ?schema ?name ?parse ?print ?default ?update ?h
 create	setup.ml	/^    let create ?schema ?name ?parse ?print ?default ?update ?help extra =$/;"	v	Module:FieldRO
 create	setup.ml	/^  let create ?plugin name publication description =$/;"	v
 current	setup.ml	/^    let current =$/;"	v
-current_selection	src/page.ml	/^    let current_selection f id =$/;"	v
+current_selection	src/page.ml	/^    let current_selection f id =$/;"	v	Module:RadioButton
 cutpoint	setup.ml	/^                let cutpoint =$/;"	v
 data	setup.ml	/^  type data = common_section *$/;"	t	Module:OASISFindlib
 data	src/page.ml	/^  type t = {form : elt; data : (string list) StringMap.t}$/;"	r	type:Form/t
@@ -560,11 +570,11 @@ hash	setup.ml	/^         let hash s = Hashtbl.hash (OASISString.lowercase_ascii 
 hd_opt	_build/src/page.ml	/^let hd_opt = function$/;"	v
 hd_opt	src/page.ml	/^let hd_opt = function$/;"	v
 header	setup.ml	/^    let header, byte, native, c_object, f =$/;"	v
-header_nodomain	_build/test/test.ml	/^      let header_nodomain =$/;"	v
-header_nodomain	test/test.ml	/^      let header_nodomain =$/;"	v
+header_nodomain	_build/test/test.ml	/^    let header_nodomain =$/;"	v
+header_nodomain	test/test.ml	/^    let header_nodomain =$/;"	v
 headers	setup.ml	/^    let headers =$/;"	v
-headers_mult	_build/test/test.ml	/^      let headers_mult =$/;"	v
-headers_mult	test/test.ml	/^      let headers_mult =$/;"	v
+headers_mult	_build/test/test.ml	/^    let headers_mult =$/;"	v
+headers_mult	test/test.ml	/^    let headers_mult =$/;"	v
 help	setup.ml	/^    let help =$/;"	v
 hidden_with	src/page.ml	/^  let hidden_with selector f =$/;"	v
 hiddens	src/page.ml	/^  let hiddens = hiddens_with ""$/;"	v
@@ -634,18 +644,18 @@ is_empty	_build/src/cookiejar.mli	/^val is_empty : t -> bool $/;"	v
 is_empty	src/cookiejar.mli	/^val is_empty : t -> bool $/;"	v
 is_identifier_char	_build/src/page.ml	/^let is_identifier_char c =$/;"	v
 is_identifier_char	src/page.ml	/^let is_identifier_char c =$/;"	v
-is_selected	src/page.ml	/^    let is_selected f menu item =$/;"	v
-is_selected	src/page.ml	/^    let is_selected f sl item =$/;"	v
+is_selected	src/page.ml	/^    let is_selected f menu item =$/;"	v	Module:RadioButton
+is_selected	src/page.ml	/^    let is_selected f sl item =$/;"	v	Module:RadioButton
 is_special	setup.ml	/^  let is_special = function | '.' | '+' | '-' | '~' -> true | _ -> false$/;"	v	Module:OASISVersion
 is_varname	_build/myocamlbuild.ml	/^  let is_varname str =$/;"	v
 is_varname	myocamlbuild.ml	/^  let is_varname str =$/;"	v
 is_varname	setup.ml	/^  let is_varname str =$/;"	v
-item	src/page.ml	/^        (name menu, value item) >>>$/;"	v
-item	src/page.ml	/^      (Soup.id sl, value item >|= singleton) >>> radd f.data$/;"	v
-item	src/page.ml	/^      (name menu, value item) >>>$/;"	v
-item	src/page.ml	/^    type item = elt$/;"	t
-items	src/page.ml	/^    let items menu = Soup.select "[type=option]" menu |> to_list$/;"	v
-items	src/page.ml	/^    let items sl = Soup.select "[type=option]" sl |> to_list$/;"	v
+item	src/page.ml	/^        (name menu, value item) >>>$/;"	v	Module:RadioButton
+item	src/page.ml	/^      (Soup.id sl, value item >|= singleton) >>> radd f.data$/;"	v	Module:RadioButton
+item	src/page.ml	/^      (name menu, value item) >>>$/;"	v	Module:RadioButton
+item	src/page.ml	/^    type item = elt$/;"	t	Module:RadioButton
+items	src/page.ml	/^    let items menu = Soup.select "[type=option]" menu |> to_list$/;"	v	Module:RadioButton
+items	src/page.ml	/^    let items sl = Soup.select "[type=option]" sl |> to_list$/;"	v	Module:RadioButton
 iter	_build/src/cookiejar.mli	/^val iter : (Cookie.t -> unit) -> t -> unit$/;"	v
 iter	src/cookiejar.ml	/^let iter f = JarMap.iter (fun x -> f)$/;"	v
 iter	src/cookiejar.mli	/^val iter : (Cookie.t -> unit) -> t -> unit$/;"	v
@@ -731,8 +741,10 @@ mp	setup.ml	/^          let mp = read_file (lexer st) MapString.empty in$/;"	v
 mp	setup.ml	/^        read_file lxr (MapString.add nm value mp)$/;"	v
 mp	setup.ml	/^      let mp =$/;"	v
 mp_todo	setup.ml	/^         let mp_todo =$/;"	v
+msg	_build/test/test.ml	/^  let msg c = Printf.sprintf "%s [%d\/%d]" (prefix^selector) c expected_count in$/;"	v
 msg	setup.ml	/^    let msg =$/;"	v
-name	_build/test/test.ml	/^      let name = Cookiejar.Cookie.name cookie in$/;"	v
+msg	test/test.ml	/^  let msg c = Printf.sprintf "%s [%d\/%d]" (prefix^selector) c expected_count in$/;"	v
+name	_build/test/test.ml	/^    let name = Cookiejar.Cookie.name cookie in$/;"	v
 name	myocamlbuild.ml	/^  type name = string$/;"	t	Module:MyOCamlbuildBase
 name	setup.ml	/^        name:      name;$/;"	r	type:PropList/Schema/t
 name	setup.ml	/^      name: string;$/;"	r	type:t
@@ -743,7 +755,7 @@ name	src/cookiejar.ml	/^  type t = {name: string; domain : string; path : string
 name	src/cookiejar.mli	/^  val name : t -> string$/;"	v
 name	src/page.ml	/^  let name frame = frame |> Soup.attribute "name"$/;"	v	Module:Frame
 name	src/page.ml	/^  let name input = Soup.attribute "name" input$/;"	v
-name	test/test.ml	/^      let name = Cookiejar.Cookie.name cookie in$/;"	v
+name	test/test.ml	/^    let name = Cookiejar.Cookie.name cookie in$/;"	v
 native	setup.ml	/^      let native acc =$/;"	v
 new_id	setup.ml	/^    let new_id =$/;"	v
 new_node	setup.ml	/^      and new_node =$/;"	v
@@ -868,10 +880,9 @@ raw_get	src/page.ml	/^  let raw_get key f = StringMap.find key f.data$/;"	v	Modu
 raw_set	src/page.ml	/^  let raw_set key value f = $/;"	v	Module:Form
 raw_unset	src/page.ml	/^  let raw_unset key f = $/;"	v	Module:Form
 raw_values	src/page.ml	/^  let raw_values f = StringMap.fold (fun id value l -> (id,value)::l) f.data []$/;"	v	Module:Form
-rb	src/page.ml	/^      (name rb, _value rb >|= singleton) >>> radd f.data$/;"	v
-rb	src/page.ml	/^      _value rb >|=$/;"	v
+rb	src/page.ml	/^      (name rb, _value rb >|= singleton) >>> radd f.data$/;"	v	Module:RadioButton
 rb	src/page.ml	/^    let value rb = _value rb |> Soup.require$/;"	v	Module:RadioButton
-rb_selector	src/page.ml	/^    let rb_selector id = Printf.sprintf "[type=radio]#%s" id$/;"	v	Module:RadioButton
+rb_selector	src/page.ml	/^    let rb_selector name = Printf.sprintf "[type=radio][name=%s]" name$/;"	v	Module:RadioButton
 rctxt	setup.ml	/^    let rctxt = ref !BaseContext.default$/;"	v	Module:BaseCompat/Compat_0_4
 read_all	setup.ml	/^  let read_all buf rdr =$/;"	v	class:OASISFileSystem/fs
 read_aux	setup.ml	/^           let rec read_aux (st, lst) =$/;"	v
@@ -921,7 +932,8 @@ secure	src/cookiejar.ml	/^    secure : bool }$/;"	r	type:Cookie/t
 secure	src/cookiejar.ml	/^  let secure c = c.secure$/;"	v	Module:Cookie
 secure	src/cookiejar.mli	/^  val secure : t -> bool$/;"	v
 select	src/page.ml	/^    let select f fu path =$/;"	v	Module:FileUpload
-select	src/page.ml	/^    let select f sl item =$/;"	v
+select	src/page.ml	/^    let select f rb =$/;"	v	Module:RadioButton
+select	src/page.ml	/^    let select f sl item =$/;"	v	Module:RadioButton
 select_list	src/page.ml	/^  type select_list$/;"	t	Module:Form
 select_list_with	src/page.ml	/^  let select_list_with selector f =$/;"	v
 select_lists	src/page.ml	/^  let select_lists = select_lists_with ""$/;"	v
@@ -931,7 +943,7 @@ server_headers	src/agent.ml	/^let server_headers agent = agent.last_headers$/;"	
 server_headers	src/agent.mli	/^val server_headers : t -> http_headers $/;"	v
 set	setup.ml	/^      let set data ?context x =$/;"	v
 set	setup.ml	/^    let set t data nm ?context x =$/;"	v	Module:PropList
-set	src/page.ml	/^    let set f fd v =$/;"	v
+set	src/page.ml	/^    let set f fd v =$/;"	v	Module:RadioButton
 set_client_headers	_build/src/agent.mli	/^val set_client_headers : Cohttp.Header.t -> t -> t$/;"	v
 set_client_headers	src/agent.ml	/^let set_client_headers headers agent = {agent with client_headers = headers}$/;"	v
 set_client_headers	src/agent.mli	/^val set_client_headers : Cohttp.Header.t -> t -> t$/;"	v
@@ -950,7 +962,7 @@ setup_update	setup.ml	/^          setup_update:     bool;$/;"	r	type:BaseCompat/
 setup_update	setup.ml	/^      setup_update:     bool;$/;"	r	type:BaseSetup/t
 since_version	setup.ml	/^  let since_version ver_str = SinceVersion (version_of_string ver_str)$/;"	v
 singleton	src/page.ml	/^  let singleton x = [x]$/;"	v
-sl	src/page.ml	/^      (Soup.id sl, value sl) >>>$/;"	v
+sl	src/page.ml	/^      (Soup.id sl, value sl) >>>$/;"	v	Module:RadioButton
 soup_index	_build/test/test.ml	/^let soup_index =$/;"	v
 soup_index	test/test.ml	/^let soup_index =$/;"	v
 source	setup.ml	/^  type source$/;"	t
@@ -999,8 +1011,6 @@ sub_start	setup.ml	/^  let sub_start str len =$/;"	v
 submit	_build/src/agent.mli	/^val submit : Page.Form.t -> t -> t Lwt.t$/;"	v
 submit	src/agent.ml	/^let submit form agent =$/;"	v
 submit	src/agent.mli	/^val submit : Page.Form.t -> t -> t Lwt.t$/;"	v
-suite_cookiejar	_build/test/test.ml	/^let suite_cookiejar = [$/;"	v
-suite_cookiejar	test/test.ml	/^let suite_cookiejar = [$/;"	v
 t	_build/src/agent.ml	/^type t = {$/;"	t
 t	_build/src/agent.mli	/^type t$/;"	t
 t	_build/src/cookiejar.mli	/^type t$/;"	t
@@ -1049,6 +1059,10 @@ test	setup.ml	/^  let test ~ctxt lst pkg extra_args =$/;"	v	Module:BaseTest
 test	setup.ml	/^  type test = string$/;"	t	Module:OASISExpr
 test_selector	_build/test/test.ml	/^let test_selector (type s) page f (module M : PageElement with type t = s) node prefix selector expected_count =$/;"	v
 test_selector	test/test.ml	/^let test_selector (type s) page f (module M : PageElement with type t = s) node prefix selector expected_count =$/;"	v
+test_selector_inputs	_build/test/test.ml	/^let test_selector_inputs form f input prefix selector expected_count =$/;"	v
+test_selector_inputs	test/test.ml	/^let test_selector_inputs form f input prefix selector expected_count =$/;"	v
+tests_cookiejar	_build/test/test.ml	/^let tests_cookiejar : Alcotest.test_case list = [$/;"	v
+tests_cookiejar	test/test.ml	/^let tests_cookiejar : Alcotest.test_case list = [$/;"	v
 text	src/page.ml	/^  let text = Soup.leaf_text$/;"	v	Module:Frame
 text	src/page.ml	/^  let text = Soup.leaf_text$/;"	v	Module:Link
 text_in	setup.ml	/^    let text_in = Open_text :: default_in$/;"	v	Module:OASISFileSystem/fs#string_of_filename/open_out/open_in/Mode
@@ -1075,7 +1089,7 @@ to_soup	_build/src/page.mli	/^val to_soup : t -> Soup.soup Soup.node$/;"	v
 to_soup	src/page.mli	/^val to_soup : t -> Soup.soup Soup.node$/;"	v
 to_string	setup.ml	/^  let to_string t =$/;"	v
 to_string	src/cookiejar.ml	/^  let to_string k = k.name ^ k.domain ^ k.path$/;"	v	Module:Key
-to_string	src/page.ml	/^    let to_string item = item >|= _value |> Soup.require$/;"	v
+to_string	src/page.ml	/^    let to_string item = item >|= _value |> Soup.require$/;"	v	Module:RadioButton
 to_unix_filename	setup.ml	/^  let to_unix_filename fn = (fn: string)$/;"	v	method:OASISFileSystem/fs#string_of_filename
 tree	setup.ml	/^  type tree =$/;"	t	Module:OASISFindlib
 uncapitalize_ascii	myocamlbuild.ml	/^  let uncapitalize_ascii s =$/;"	v
@@ -1133,8 +1147,8 @@ vl	setup.ml	/^    let vl =$/;"	v
 warning	setup.ml	/^  let warning ~ctxt fmt =$/;"	v
 which	setup.ml	/^  let which ~ctxt prg =$/;"	v
 writer	setup.ml	/^  class type writer =$/;"	c	Module:OASISFileSystem
-|>	src/page.ml	/^    let to_string item = item >|= _value |> Soup.require$/;"	f
-|>	src/page.ml	/^    let to_string item = item |> value |> Soup.require$/;"	f
+|>	src/page.ml	/^    let to_string item = item >|= _value |> Soup.require$/;"	f	Module:RadioButton
+|>	src/page.ml	/^    let to_string item = item |> value |> Soup.require$/;"	f	Module:RadioButton
 |?	_build/src/cookiejar.ml	/^let (|?) = Infix.Option.(|?)$/;"	f
 |?	src/cookiejar.ml	/^let (|?) = Infix.Option.(|?)$/;"	f
 |?	src/infix.ml	/^  let (|?) x default = match x with Some x -> x | None -> default$/;"	f	Module:Option
