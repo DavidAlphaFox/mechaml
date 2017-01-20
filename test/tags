@@ -7,25 +7,30 @@
 Exit	test.ml	/^    | exception Exit -> true$/;"	e
 PageElement	test.ml	1;"	M
 Test	test.ml	1;"	M
-cookie	test.ml	/^      let cookie = random_cookie (Uri.host uri |? "dunno.com") in$/;"	v
-cookie	test.ml	/^      let value = Cookiejar.Cookie.value cookie in$/;"	v
+check_int	test.ml	/^let check_int = Alcotest.(check int)$/;"	v
+check_string	test.ml	/^let check_string = Alcotest.(check string)$/;"	v
+check_true	test.ml	/^let check_true msg = Alcotest.(check bool) msg true$/;"	v
+cookie	test.ml	/^    let cookie = random_cookie (Uri.host uri |? "dunno.com") in$/;"	v
+cookie	test.ml	/^    let value = Cookiejar.Cookie.value cookie in$/;"	v
 cookie	test.ml	/^  let value = Cookiejar.Cookie.value cookie in$/;"	v
-cookie_uri	test.ml	/^      let cookie_uri = Printf.sprintf "http:\/\/%s\/a.php" domain$/;"	v
+cookie_uri	test.ml	/^    let cookie_uri = Printf.sprintf "http:\/\/%s\/a.php" domain$/;"	v
 domain	test.ml	/^  Printf.sprintf "%s=%s; Domain=%s" name value domain$/;"	v
 ext	test.ml	/^  let ext = random_string 2 in$/;"	v
-header_nodomain	test.ml	/^      let header_nodomain =$/;"	v
-headers_mult	test.ml	/^      let headers_mult =$/;"	v
+fail	test.ml	/^let fail = Alcotest.fail$/;"	v
+header_nodomain	test.ml	/^    let header_nodomain =$/;"	v
+headers_mult	test.ml	/^    let headers_mult =$/;"	v
 jar_eq	test.ml	/^let rec jar_eq cookies jar =$/;"	v
 jar_from	test.ml	/^let jar_from =$/;"	v
-name	test.ml	/^      let name = Cookiejar.Cookie.name cookie in$/;"	v
+msg	test.ml	/^  let msg c = Printf.sprintf "%s [%d\/%d]" (prefix^selector) c expected_count in$/;"	v
+name	test.ml	/^    let name = Cookiejar.Cookie.name cookie in$/;"	v
 nodes	test.ml	/^  let nodes = f selector page in$/;"	v
 path	test.ml	/^  let path = random_string (between 5 10) in$/;"	v
 random_char	test.ml	/^let random_char () =$/;"	v
 random_cookie	test.ml	/^let random_cookie domain =$/;"	v
 random_string	test.ml	/^let random_string n =$/;"	v
 soup_index	test.ml	/^let soup_index =$/;"	v
-suite_cookiejar	test.ml	/^let suite_cookiejar = [$/;"	v
 t	test.ml	/^  type t$/;"	t	Module:PageElement
 t	test.ml	/^let test_selector (type s) page f (module M : PageElement with type t = s) node prefix selector expected_count =$/;"	t
 test_selector	test.ml	/^let test_selector (type s) page f (module M : PageElement with type t = s) node prefix selector expected_count =$/;"	v
+test_selector_inputs	test.ml	/^let test_selector_inputs form f input prefix selector expected_count =$/;"	v
 to_node	test.ml	/^  val to_node : t -> Soup.element Soup.node$/;"	v	Module:PageElement

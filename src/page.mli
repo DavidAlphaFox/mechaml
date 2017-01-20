@@ -101,6 +101,7 @@ module Form : sig
     val values : t -> checkbox input -> string list
     val choices : t -> checkbox input -> checkbox inputs
 
+    val checked : t -> checkbox input -> string list
     val check : t -> checkbox input -> t
     val uncheck : t -> checkbox input -> t
     val is_checked : t -> checkbox input -> bool
@@ -111,6 +112,7 @@ module Form : sig
     val values : t -> radio_button input -> string list
     val choices : t -> radio_button input -> radio_button inputs 
 
+    val selected : t -> checkbox input -> string option
     val select : t -> radio_button input -> t
     val is_selected : t -> radio_button input -> bool
   end
@@ -119,19 +121,12 @@ module Form : sig
     type item
 
     val items : select_list input -> item list
+
+    val selected : t -> select_list input -> string option
     val select : t -> select_list input -> item -> t
     val unselect : t -> select_list input -> item -> t
     val is_selected : t -> select_list input -> item -> bool
-    val to_string : item -> string
-  end
 
-  module Menu : sig
-    type item
-
-    val items : menu input -> item list
-    val select : t -> menu input -> item -> t
-    val unselect : t -> menu input -> item -> t
-    val is_selected : t -> select_list input -> item -> bool
     val to_string : item -> string
   end
 

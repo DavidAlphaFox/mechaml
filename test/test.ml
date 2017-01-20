@@ -11,8 +11,7 @@
   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
   DATA
   OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-  OTHER
-  TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE
+  OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE
   USE OR
   PERFORMANCE OF THIS SOFTWARE.
   }}}*)
@@ -106,6 +105,7 @@ end
 let check_true msg = Alcotest.(check bool) msg true
 let check_string = Alcotest.(check string)
 let check_int = Alcotest.(check int)
+let fail = Alcotest.fail
 
 let test_selector (type s) page f (module M : PageElement with type t = s) node prefix selector expected_count =
   let nodes = f selector page in
@@ -123,7 +123,9 @@ let test_selector (type s) page f (module M : PageElement with type t = s) node 
 let test_selector_inputs form f input prefix selector expected_count =
   let inputs = f selector form in
   let msg c = Printf.sprintf "%s:%s [%d/%d]" prefix selector c expected_count in
-  let node_name = if input = "textarea" then input else "input" in
+  let node_name = match input with
+    | "textarea" | "select" -> input
+    | _ -> "input" in
   inputs
   |> Page.Form.fold (fun c _ -> succ c) 0
   |> (fun c -> check_int (msg c) expected_count c);
@@ -134,7 +136,7 @@ let test_selector_inputs form f input prefix selector expected_count =
     |> Soup.name
     |> check_string (prefix^":bad node type") node_name;
     match input with
-      | "textarea" -> ()
+      | "textarea" | "select" -> ()
       | _ ->
         x
         |> Page.Form.input_to_node
@@ -143,7 +145,7 @@ let test_selector_inputs form f input prefix selector expected_count =
           | Some t ->
             check_string (prefix^":bad input type") t input
           | None ->
-            check_true (prefix^":input node without type attribute") false
+            fail (prefix^":input node without type attribute")
         ))
 
 let tests_cookiejar : Alcotest.test_case list = [
@@ -249,19 +251,19 @@ let tests_page : Alcotest.test_case list = [
 
     (match check1_choice1,check1_choice2 with
       | _,None | None,_ ->
-        check_true "checkbox_with [name=check1][value=choice1/2] found none" false
+        fail "checkbox_with [name=check1][value=choice1/2] found none"
       | Some c1,Some c2 ->
         form := c1 |> F.Checkbox.check !form;
         form := c2 |> F.Checkbox.check !form;
         c1
-        |> F.Checkbox.is_checked
+        |> F.Checkbox.is_checked !form
         |> check_true "checkbox_choice1 (checked?)";
         c2
-        |> F.Checkbox.is_checked
+        |> F.Checkbox.is_checked !form
         |> check_true "checkbox_choice2 (checked?)";
         form := c2 |> F.Checkbox.uncheck !form;
         c2
-        |> F.Checkbox.is_checked
+        |> F.Checkbox.is_checked !form
         |> not |> check_true "checkbox_choice2 (unchecked?)");
 
     let radio_buttons_with =
@@ -281,16 +283,81 @@ let tests_page : Alcotest.test_case list = [
 
     (match radio1_choice1,radio1_choice2 with
       | _,None | None,_ ->
-        check_true "radio_button_with [name=radio1][value=choice1/2] found none" false
+        fail "radio_button_with [name=radio1][value=choice1/2] found none"
       | Some c1,Some c2 ->
-        form := c1 |> F.radio_button.select !form;
-        form := c2 |> F.radio_button.select !form;
-        c1
-        |> F.radio_button.is_selected
-        |> check_true "radio_button_choice1 (selected?)";
+        form := c1 |> F.RadioButton.select !form;
+        form := c2 |> F.RadioButton.select !form;
         c2
-        |> F.radio_button.is_selected
-        |> not |> check_true "radio_button_choice2 (unselected?)"));
+        |> F.RadioButton.is_selected !form
+        |> check_true "radio_button_choice2 (selected?)";
+        c1
+        |> F.RadioButton.is_selected !form
+        |> not |> check_true "radio_button_choice1 (unselected?)");
+
+    let selects_with =
+      test_selector_inputs !form F.select_lists_with "select" "select_lists_with"
+    in
+
+    selects_with "[name=select1]" 1;
+    selects_with "[name=select2]" 1;
+    selects_with "[name=nothere]" 0;
+    selects_with "" 2;
+
+    let select1 = !form |> F.select_list_with "[name=select1]" |> Soup.require in 
+    let items = select1 |> F.SelectList.items in
+    (match items with
+      | [x;y;z] ->
+        form := x |> F.SelectList.select !form select1;
+        form := y |> F.SelectList.select !form select1;
+        y 
+        |> F.SelectList.is_selected !form select1
+        |> check_true "select_list choice2 (selected ?)";
+        x 
+        |> F.SelectList.is_selected !form select1
+        |> not |> check_true "select_list choice1 (selected ?)";
+      | _ ->
+        items
+        |> List.length
+        |> Printf.sprintf "select_list : select1 has %d items, expected 3"
+        |> fail);
+
+    let texts_with =
+      test_selector_inputs !form F.fields_with "text" "select_field(text)"
+    and passwords_with =
+      test_selector_inputs !form F.fields_with "password"
+        "select_field(password)"
+    and textareas_with =
+      test_selector_inputs !form F.fields_with "textarea" "select_field(textarea)"
+    in
+
+    texts_with "[name=text1]" 1;
+    texts_with "[name=text2]" 1;
+    texts_with "[name=text-none]" 0;
+    texts_with "" 2;
+
+    passwords_with "[name=password1]" 1;
+    passwords_with "[name=password2]" 1;
+    passwords_with "[name=password-none]" 0;
+    passwords_with "" 2;
+
+    textareas_with "[name=area1]" 1;
+    textareas_with "[name=area2]" 1;
+    textareas_with "[name=area-none]" 0;
+    textareas_with "" 2;
+
+    let check_content selector =
+      let field = !form |> F.field_with selector |> Soup.require
+      and content = random_string 20 in 
+      F.Field.set !form field content;
+      F.Field.get !form field
+      |> Soup.require
+      |> (=) content
+      |> check_true ("consistency of field's content"^selector) 
+    in
+
+    check_content "[name=text1]";
+    check_content "[name=password1]";
+    check_content "[name=area1]";);
 
   "links", `Quick, (fun _ ->
     let page = soup_index |> Page.from_soup in
@@ -344,34 +411,7 @@ let tests_page : Alcotest.test_case list = [
     images_with "img" 3;
     images_with ".imgclass" 2;
     images_with "table > img" 1;
-    images_with "div + img" 1);
-
-  "frames", `Quick ,(fun _ ->
-    let page = soup_index |> Page.from_soup in
-    let frames_with =
-      test_selector page Page.frames_with (module Page.Frame) "frame" "frames_with" in
-
-    frames_with "[id=fone]" 1;
-    frames_with "[id=ftwo]" 1;
-    frames_with "[id=frame-none]" 0;
-
-    frames_with "frame[id=frame-one]" 1;
-    frames_with "frame[id=frame-none]" 0;
-    frames_with "div" 0;
-    frames_with "div, frame" 0;
-    frames_with "div[id=frame1]" 0;
-
-    frames_with ".noneclass" 0;
-
-    frames_with "" 2;
-    frames_with "*" 2;
-    frames_with "[src^=https]" 1;
-    frames_with "[src$=.html]" 1;
-    frames_with "[src*=http]" 2;
-    frames_with "frame" 2;
-    frames_with ".frameclass" 2;
-    frames_with "table > frame" 1;
-    frames_with "div ~ frame" 1)
+    images_with "div + img" 1)
 ]
 
 let test_suite = [

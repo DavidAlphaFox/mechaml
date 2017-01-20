@@ -21,11 +21,6 @@
             <input type="radio" name="radio2" value="choice2"/>
             <input type="radio" name="radio2" value="choice3"/>
         </ul>
-        <select name="select1">
-          <option value="choice1">Choice 1</option>
-          <option value="choice1">Choice 2</option>
-          <option value="choice1">Choice 3</option>
-        </select>
         <input type="submit" value="Submit"/>
           
       </form>
@@ -34,11 +29,6 @@
       <li>An item</li>
       <form id="form-two" class="formclass" action="/action-two">
         This a form with :
-        <select name="select2">
-          <option value="choice1">Choice 1</option>
-          <option value="choice1">Choice 2</option>
-          <option value="choice1">Choice 3</option>
-        </select>
         <input type="submit" value="Submit"/>
       </form>
       <li>Another item</li>
@@ -57,8 +47,6 @@
     </table>
     <img class="imgclass" src="http://www.anothersite.it" />
     <div></div>
-    <frames>
-      <frame id="ftwo" class="frameclass" src="http://aweb.page/page.html" />
-    </frames>
+    <frame id="ftwo" class="frameclass" src="http://aweb.page/page.html" />
   </body>
 </html>
