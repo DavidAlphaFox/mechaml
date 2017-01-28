@@ -95,8 +95,8 @@ module Form = struct
   let radio_buttons = radio_buttons_with ""
 
   let select_lists_with selector f =
-    f.form |> Soup.select (tag_selector "input[type=select]" selector)
-    |> Soup.filter (input_filter "select")
+    f.form |> Soup.select (tag_selector "select" selector)
+    |> Soup.filter (tag_filter "select")
 
   let select_list_with selector f =
     f |> select_lists_with selector |> Soup.first
@@ -112,7 +112,7 @@ module Form = struct
       | _ -> false
 
   let fields_with selector f =
-    f.form |> Soup.select (tag_selector "input" selector)
+    f.form |> Soup.select (tag_selector "" selector)
     |> Soup.filter field_filter
 
   let field_with selector f =
@@ -164,7 +164,7 @@ module Form = struct
     f |> textareas_with selector |> Soup.first
 
   let textareas = textareas_with ""
-
+  
   let keygens_with selector f =
     f.form |> Soup.select (tag_selector "input[type=keygen]" selector)
     |> Soup.filter (input_filter "keygen")
@@ -290,7 +290,7 @@ module Form = struct
   module SelectList = struct
     type item = elt
 
-    let items sl = Soup.select "[type=option]" sl |> to_list
+    let items sl = Soup.select "option" sl |> to_list
 
     let selected f sl =
       name sl >>= current_value f.data
