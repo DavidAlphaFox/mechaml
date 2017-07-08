@@ -35,6 +35,17 @@ type http_status_code = Cohttp.Code.status_code
 type http_headers = Cohttp.Header.t
 type http_meth = Cohttp.Code.meth
 
+type response = Cohttp.Response.t
+  (* = { *)
+  (*   enconding: Cohttp.Transfer.enconding; *)
+  (*   headers: Cohttp.Header.t; *)
+  (*   version: Cohttp.Code.version; *)
+  (*   status: http_status_code; *)
+  (*   flush: bool; *)
+  (* } *)
+
+type result = t * response * string
+
 (** {2 Main operations } *)
 
 (** Create a new empty agent. [~max_redirect] indicates how many times the agent
@@ -46,57 +57,30 @@ val init : ?max_redirect:int -> unit -> t
 
 (** Perform a get request to the specified URI *)
 
-val get : string -> t -> t Lwt.t
-val get_uri : Uri.t -> t -> t Lwt.t
+val get : string -> t -> result Lwt.t
+val get_uri : Uri.t -> t -> result Lwt.t
 
 (** Same as get, but work directly with links instead of URIs *)
-val click : Page.Link.t -> t -> t Lwt.t
+val click : Page.Link.t -> t -> result Lwt.t
 
 (** Send a raw post requet to the specified URI *)
 
-val post : string -> string -> t -> t Lwt.t
-val post_uri : Uri.t -> string -> t -> t Lwt.t
+val post : string -> string -> t -> result Lwt.t
+val post_uri : Uri.t -> string -> t -> result Lwt.t
 
 (** Submit a filled form *)
-val submit : Page.Form.t -> t -> t Lwt.t
+val submit : Page.Form.t -> t -> result Lwt.t
 
 (** Save the downloaded content in a file *)
 
 (** [save_image image "myfile.jpg" agent] load the image using [get], open
    [myfile.jpg] and write the received content.  *)
-val save_image : Page.Image.t -> string -> t -> unit Lwt.t
+val save_image : Page.Image.t -> string -> t -> result Lwt.t
 
-(** [save_content ~mode:`Binary "myfile.html" agent] write the current content of the agent in
-   a file. *)
-val save_content : string -> t -> unit Lwt.t
+(** [save_content content "myfile.html"] write the specified content in a file *)
+val save_content : string -> string -> unit Lwt.t
 
-(** {3 Response} *)
-
-(** Return the last URI requested, or an empty one if none  *)
-val uri : t -> Uri.t
-
-(** Return the method used to retrieve the content, or [`Other "None"] if none
-  *)
-val meth : t -> http_meth
-
-(** Return the last page, or None if none or any error ocurred during HTML
-   parsing *)
-val page : t -> Page.t option
-
-(** Return the raw content of the last response as a string, or an empty string
-   if none *)
-val content : t -> string
-
-(** Return the headers sent by the last response, or empty headers if none *)
-val server_headers : t -> http_headers
-
-(** Return the HTTP code of the last reponse, or [`Code (-1)] if none *)
-val status_code : t -> http_status_code
-
-(** Convert a code to the corresponding int code *)
-val code_of_status : http_status_code -> int
-
-(** {4 Proxy} *)
+(** {3 Proxy} *)
 
 (** Proxy are currently NOT SUPPORTED YET *)
 
@@ -108,7 +92,7 @@ val set_proxy : ?user:string
 
 val disable_proxy : t -> t
 
-(** {5 Cookies} (see {!module:Cookiejar}) *)
+(** {4 Cookies} (see {!module:Cookiejar}) *)
 
 (** Return the current Cookiejar *)
 val cookie_jar : t -> Cookiejar.t
@@ -122,7 +106,7 @@ val add_cookie : Cookiejar.Cookie.t -> t -> t
 (** Remove a single cookie from the Cookiejar *)
 val remove_cookie : Cookiejar.Cookie.t -> t -> t
 
-(** {6 Headers} *)
+(** {5 Headers} *)
 
 (** Return the default headers sent when performing HTTP requests *)
 val client_headers : t -> Cohttp.Header.t
@@ -136,7 +120,7 @@ val add_client_header : string -> string -> t -> t
 (** Remove a single pair key/value from the default headers *)
 val remove_client_header : string -> t -> t
 
-(** {7 Redirection} *)
+(** {6 Redirection} *)
 
 (** Max redirection to avoid infinite loops (use 0 to disable automatic
    redirection) *)

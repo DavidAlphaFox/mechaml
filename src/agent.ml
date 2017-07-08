@@ -27,78 +27,63 @@ type http_status_code = Cohttp.Code.status_code
 type http_headers = Cohttp.Header.t
 type http_meth = Cohttp.Code.meth
 
+type response = Cohttp.Response.t
+type result = t * (response * string)
+
 type proxy = {
   user : string option;
   password : string option;
   host : string;
-  port : int}
+  port : int
+}
 
 type t = {
-  last_uri : Uri.t;
-  last_meth : http_meth;
-  last_page : Page.t option;
-  last_headers : Header.t;
-  last_status_code : http_status_code;
-  last_body : string;
   proxy : proxy option;
   cookie_jar : Cookiejar.t;
   client_headers : Header.t;
   max_redirect : int;
-  redirect : int}
+  redirect : int
+}
 
 let default_max_redirect = 5
 
 let init ?(max_redirect = default_max_redirect) _ =
-  { last_uri = Uri.empty;
-    last_meth = `Other "None";
-    last_page = None;
-    last_headers = Cohttp.Header.init ();
-    last_status_code = `Code (-1);
-    last_body = "";
-    proxy = None;
+  { proxy = None;
     cookie_jar = Cookiejar.empty;
     client_headers = Header.init ();
     max_redirect;
     redirect = 0}
 
-let rec redirect agent =
-  match agent.last_status_code with
+let rec redirect (agent,(response,content)) =
+  match response.status with
     | `Moved_permanently
     | `Found ->
-      (match Cohttp.Header.get agent.last_headers "Location" with
+      (match Cohttp.Header.get response.headers "Location" with
         | Some loc ->
           { agent with redirect = succ agent.redirect}
           |> get loc
-        | None -> Lwt.return { agent with redirect = 0 })
-    | _ -> Lwt.return { agent with redirect = 0 }
+        | None -> Lwt.return ({ agent with redirect = 0 }, (response,content)) )
+    | _ -> Lwt.return ({ agent with redirect = 0 }, (response,content))
 
-and update_agent uri meth agent (response,body) =
-  Cohttp_lwt_body.to_string body
-  >|= (function body_str ->
-    let code = Response.status response in
-    let headers = Response.headers response in
-    let page = try
-      Some (body_str |> Soup.parse |> Page.from_soup)
-    with _ -> None in
-    {agent with
-      last_uri = uri;
-      last_meth = meth;
-      last_page = page;
-      last_headers = headers;
-      last_status_code = code;
-      last_body = body_str;
-      cookie_jar = Cookiejar.add_from_headers uri headers agent.cookie_jar})
-  >>= (function agent ->
-    if agent.redirect < agent.max_redirect then
-      redirect agent
-    else
-      Lwt.return { agent with redirect=0 })
+and update_agent uri meth agent (response,content) =
+  let code = Response.status response in
+  let headers = Response.headers response in
+  let agent = 
+    {agent with cookie_jar = 
+      Cookiejar.add_from_headers uri response.headers agent.cookie_jar}
+  in
+  if agent.redirect < agent.max_redirect then
+    redirect agent
+  else
+    Lwt.return { agent with redirect=0 }
 
 and get_uri uri agent =
   let headers = agent.cookie_jar
     |> Cookiejar.add_to_headers uri agent.client_headers in
   Client.get ~headers uri
-  >>= update_agent uri `GET agent
+  >>= function (response,content) ->
+  
+  >>= update_agent uri agent
 
 and get uri_string agent =
   get_uri (Uri.of_string uri_string) agent
