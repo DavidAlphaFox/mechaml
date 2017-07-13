@@ -43,13 +43,21 @@ module Cookie = struct
   let path c = c.path
   let secure c = c.secure
 
+  (* let domain_match host dom = *)
+  (*   let host_length,dom_length = String.length host, String.length dom in *)
+  (*   let delta = host_length - dom_length in *)
+  (*   host=dom *)
+  (*   || (dom_length > 0 && dom.[0]='.' && delta >= 0 *)
+  (*     && String.sub host delta (host_length-delta) = dom *)
+  (*     && (String.sub host 0 (delta-1) |> String.contains) '.' |> not) *)
+
   let domain_match host dom =
     let host_length,dom_length = String.length host, String.length dom in
     let delta = host_length - dom_length in
     host=dom
-    || (dom_length > 0 && dom.[0]='.' && delta >= 0
+    || (delta > 0
       && String.sub host delta (host_length-delta) = dom
-      && (String.sub host 0 (delta-1) |> String.contains) '.' |> not)
+      && host.[delta-1] = '.')
 
   let path_match uri_path cookie_path =
     let u_length, c_length = String.length uri_path,

@@ -17,22 +17,17 @@
   PERFORMANCE OF THIS SOFTWARE.
   }}}*)
 
-(** Some infix operators for the option Monad *)
-module Option : sig
-  (** The monadic bind operator *)
-  val (>>=) : 'a option -> ('a -> 'b option) -> 'b option
+type 'a m = Agent.t -> (Agent.t * 'a) Lwt.t
 
-  (** The usual [map] + application : [None >|= f] is [None] and [Some x >|= f] is
-     [Some (f x)] *)
-  val (>|=) : 'a option -> ('a -> 'b) -> 'b option
+let (>>=) x f =
+  fun agent ->
+    Lwt.bind (x agent) (fun (agent,result) ->
+      (f result))
 
-  (** Apply a two argument function to a pair of optionals : if one of the
-     component is [None], then return [None], otherwise [(Some x, Some y) >>> f] is
-     [Some (f x y)] *)
-  val (>>>) : 'a option * 'b option-> ('a -> 'b -> 'c) -> 'c option
+let (>>) x y = x >>= (fun _ -> y)
 
-  (** Return the content of an optional, or the given default value if the first
-     argument is [None]. Id est [Some x |? def] is [x] and [None |? def] is
-     [def]. *)
-  val (|?) : 'a option -> 'a -> 'a
-end
+let return x = 
+  fun agent -> Lwt.return (agent,x)
+
+let run agent x =
+  Lwt.run (x agent)

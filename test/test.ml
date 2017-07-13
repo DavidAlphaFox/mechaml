@@ -321,34 +321,45 @@ let tests_page : Alcotest.test_case list = [
         |> Printf.sprintf "select_list : select1 has %d items, expected 3"
         |> fail);
 
-    let texts_with =
-      test_selector_inputs !form F.fields_with "text" "select_field(text)"
+    let fields_with t =
+      test_selector_inputs !form F.fields_with t "select_field" 
+    and texts_with =
+      test_selector_inputs !form F.texts_with "text" "select_text"
     and passwords_with =
-      test_selector_inputs !form F.fields_with "password"
-        "select_field(password)"
+      test_selector_inputs !form F.passwords_with "password"
+        "select_password"
     and textareas_with =
-      test_selector_inputs !form F.fields_with "textarea" "select_field(textarea)"
+      test_selector_inputs !form F.textareas_with "textarea" "select_textarea"
     in
 
     texts_with "[name=text1]" 1;
+    fields_with "text" "[name=text1]" 1;
     texts_with "[name=text2]" 1;
+    fields_with "text" "[name=text2]" 1;
     texts_with "[name=text-none]" 0;
+    fields_with "text" "[name=text-none]" 0;
     texts_with "" 2;
 
     passwords_with "[name=password1]" 1;
+    fields_with "password" "[name=password1]" 1;
     passwords_with "[name=password2]" 1;
+    fields_with "password" "[name=password2]" 1;
     passwords_with "[name=password-none]" 0;
+    fields_with "password" "[name=password-none]" 0;
     passwords_with "" 2;
 
     textareas_with "[name=area1]" 1;
+    fields_with "textarea" "[name=area1]" 1;
     textareas_with "[name=area2]" 1;
+    fields_with "textarea" "[name=area2]" 1;
     textareas_with "[name=area-none]" 0;
+    fields_with "textarea" "[name=area-none]" 0;
     textareas_with "" 2;
 
     let check_content selector =
       let field = !form |> F.field_with selector |> Soup.require
       and content = random_string 20 in 
-      F.Field.set !form field content;
+      form := F.Field.set !form field content;
       F.Field.get !form field
       |> Soup.require
       |> (=) content
