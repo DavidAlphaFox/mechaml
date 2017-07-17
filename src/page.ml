@@ -289,7 +289,7 @@ module Form = struct
         Soup.select s f.form) |> Soup.require
 
     let choices f rb =
-      name rb >|= rb_selector >|= (fun s ->
+      iname rb >|= rb_selector >|= (fun s ->
         Soup.select s f.form) |> Soup.require
 
     let values f rb =

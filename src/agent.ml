@@ -23,12 +23,24 @@ let (>|=) = Lwt.(>|=)
 open Cohttp
 open Cohttp_lwt_unix
 
-type http_status_code = Cohttp.Code.status_code
-type http_headers = Cohttp.Header.t
-type http_meth = Cohttp.Code.meth
+type http_status_code = Code.status_code
+type http_headers = Header.t
 
-type response = Cohttp.Response.t
-type result = t * (response * string)
+module HttpResponse = struct
+  type t = Response.t * string 
+
+  let status (response,_) =
+    Response.status response
+
+  let headers (response,_) =
+    Response.headers response
+
+  let content = snd
+
+  let cohttp_response = fst
+end
+
+type response = HttpResponse.t
 
 type proxy = {
   user : string option;
@@ -45,6 +57,8 @@ type t = {
   redirect : int
 }
 
+type result = t * HttpResponse.t 
+
 let default_max_redirect = 5
 
 let init ?(max_redirect = default_max_redirect) _ =
@@ -55,48 +69,38 @@ let init ?(max_redirect = default_max_redirect) _ =
     redirect = 0}
 
 let rec redirect (agent,(response,content)) =
-  match response.status with
+  match Response.status response with
     | `Moved_permanently
     | `Found ->
-      (match Cohttp.Header.get response.headers "Location" with
+      (match Header.get (Response.headers response) "Location" with
         | Some loc ->
           { agent with redirect = succ agent.redirect}
           |> get loc
-        | None -> Lwt.return ({ agent with redirect = 0 }, (response,content)) )
-    | _ -> Lwt.return ({ agent with redirect = 0 }, (response,content))
+        | None -> Lwt.return ({ agent with redirect = 0 },(response,content)) )
+    | _ -> Lwt.return ({ agent with redirect = 0 },(response,content))
 
-and update_agent uri meth agent (response,content) =
-  let code = Response.status response in
+and update_agent uri agent (response,body) =
   let headers = Response.headers response in
   let agent = 
     {agent with cookie_jar = 
-      Cookiejar.add_from_headers uri response.headers agent.cookie_jar}
+      Cookiejar.add_from_headers uri headers agent.cookie_jar}
   in
-  if agent.redirect < agent.max_redirect then
-    redirect agent
-  else
-    Lwt.return { agent with redirect=0 }
+  body
+  |> Cohttp_lwt_body.to_string
+  >>= (function content -> 
+    if agent.redirect < agent.max_redirect then
+      redirect (agent,(response,content))
+    else
+      Lwt.return ({ agent with redirect=0 },(response,content)))
 
 and get_uri uri agent =
   let headers = agent.cookie_jar
     |> Cookiejar.add_to_headers uri agent.client_headers in
   Client.get ~headers uri
-  >>= function (response,content) ->
-  
   >>= update_agent uri agent
 
 and get uri_string agent =
   get_uri (Uri.of_string uri_string) agent
-
-let load image agent =
-  let page = agent.last_page in
-  let uri = Page.Image.uri image in
-  let headers = agent.cookie_jar
-    |> Cookiejar.add_to_headers uri agent.client_headers in
-  Client.get ~headers:headers uri
-  >>= update_agent uri `GET agent
-  >|= fun agent ->
-    {agent with last_page = page}
 
 let click link = link |> Page.Link.uri |> get_uri
 
@@ -104,7 +108,7 @@ let post_uri uri content agent =
   let headers = agent.cookie_jar
     |> Cookiejar.add_to_headers uri agent.client_headers in
   Client.post ~headers:headers ~body:(Cohttp_lwt_body.of_string content) uri
-  >>= update_agent uri `POST agent
+  >>= update_agent uri agent
 
 let post uri_string content agent =
   post_uri (Uri.of_string uri_string) content agent
@@ -115,12 +119,12 @@ let submit form agent =
   let headers = agent.cookie_jar
     |> Cookiejar.add_to_headers uri agent.client_headers in
   Client.post_form ~headers:headers ~params:params uri
-  >>= update_agent uri `POST agent
+  >>= update_agent uri agent
 
-let save_content file agent =
+let save_content file data =
   Lwt_io.open_file Lwt_io.output file
   >>= (fun out ->
-    Lwt_io.write out agent.last_body
+    Lwt_io.write out data
     |> ignore;
     Lwt_io.close out)
 
@@ -128,14 +132,10 @@ let save_image image file agent =
   let uri = Page.Image.uri image in
   agent
   |> get_uri uri
-  >>= save_content file
+  >>= (function (agent,(response,content)) ->
+    save_content file content
+    >|= fun _ -> (agent,(response,content)))
 
-let uri agent = agent.last_uri
-let meth agent = agent.last_meth
-let page agent = agent.last_page
-let content agent = agent.last_body
-let server_headers agent = agent.last_headers
-let status_code agent = agent.last_status_code
 let code_of_status = Code.code_of_status
 
 let set_proxy ?user ?password ~host ~port agent =
@@ -159,3 +159,88 @@ let remove_client_header header agent =
   {agent with client_headers = Header.remove agent.client_headers header}
 
 let set_max_redirect max_redirect agent = {agent with max_redirect }
+
+module Monad = struct
+  type 'a m = t -> (t * 'a) Lwt.t
+  type result = response * string
+
+  let bind (x : 'a m) (f : 'a -> 'b m) =
+    fun agent ->
+      Lwt.bind (x agent) (fun (agent,result) ->
+        f result agent)
+
+  let (>>=) = bind
+
+  let (<<=) x f = f >>= x
+
+  let (>>) x y = x >>= (fun _ -> y)
+
+  let (<<) y x = x >> y
+
+  let return (x : 'a) = 
+    fun agent -> Lwt.return (agent,x)
+
+  let return_from_lwt (x : 'a Lwt.t) =
+    fun agent ->
+      Lwt.bind x (fun y ->
+        Lwt.return (agent,y))
+
+  let map (f : 'a -> 'b) (x : 'a m) =
+    x >>= (function y ->
+      f y
+      |> return)
+
+  let run (agent : t) (x : 'a m) =
+    Lwt_main.run (x agent)
+
+  let (>|=) (x : 'a m) (f : 'a -> 'b) = x |> map f
+  let (<|=) f x = x |> map f
+
+  let save_content data file =
+    save_content data file
+    |> return_from_lwt
+
+  let monadic_get g =
+    fun agent ->
+      Lwt.return (agent, g agent)
+
+  let monadic_set s =
+    fun agent ->
+      Lwt.return (s agent, ())
+
+  (* let set_proxy ?user ?password ~host ~port = *)
+  (*   set_proxy ~user ~password ~host ~port *)
+  (*   |> monadic_set *)
+
+  let cookie_jar = monadic_get cookie_jar
+
+  let set_cookie_jar jar =
+    set_cookie_jar jar
+    |> monadic_set
+
+  let add_cookie cookie =
+    add_cookie cookie
+    |> monadic_set
+
+  let remove_cookie cookie =
+    remove_cookie cookie
+    |> monadic_set
+
+  let client_headers = monadic_get client_headers
+
+  let set_client_headers headers = 
+    set_client_headers headers
+    |> monadic_set
+
+  let add_client_header key value =
+    add_client_header key value
+    |> monadic_set
+
+  let remove_client_header key =
+    remove_client_header key
+    |> monadic_set
+
+  let set_max_redirect n =
+    set_max_redirect n
+    |> monadic_set
+end

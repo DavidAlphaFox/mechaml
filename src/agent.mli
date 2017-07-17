@@ -33,9 +33,17 @@
 type t
 type http_status_code = Cohttp.Code.status_code
 type http_headers = Cohttp.Header.t
-type http_meth = Cohttp.Code.meth
 
-type response = Cohttp.Response.t
+module HttpResponse : sig
+  type t
+
+  val status : t -> http_status_code
+  val headers : t -> http_headers
+  val content : t -> string
+
+  val cohttp_response : t -> Cohttp.Response.t
+end
+
   (* = { *)
   (*   enconding: Cohttp.Transfer.enconding; *)
   (*   headers: Cohttp.Header.t; *)
@@ -44,7 +52,7 @@ type response = Cohttp.Response.t
   (*   flush: bool; *)
   (* } *)
 
-type result = t * response * string
+type result = t * HttpResponse.t
 
 (** {2 Main operations } *)
 
@@ -126,3 +134,66 @@ val set_max_redirect : int -> t -> t
 
 (** The default maximum consecutive redirections. Used to avoid redirect loops *)
 val default_max_redirect : int
+
+(** {5 Monad} 
+    This module defines a monad that manages a state corresponding to the agent
+    so that it is not needed to carry it everywhere explicitely as a parameter,
+    all inside the Lwt.t monad. Morally, one can think of a state monad
+    specialized and the Lwt.t monad stacked.
+*)
+
+module Monad : sig
+  type 'a m = t -> (t * 'a) Lwt.t
+  
+  val bind : 'a m -> ('a -> 'b m) -> 'b m
+  val (>>=) : 'a m -> ('a -> 'b m) -> 'b m
+  val (<<=) : ('a -> 'b m) -> 'a m -> 'b m
+  val (>>) : 'a m -> 'b m -> 'b m
+  val (<<) : 'b m -> 'a m -> 'b m
+  
+  val return : 'a -> 'a m
+  val return_from_lwt : 'a Lwt.t -> 'a m
+  val map : ('a -> 'b) -> 'a m -> 'b m
+  
+  val (>|=) : 'a m -> ('a -> 'b) -> 'b m
+  val (<|=) : ('a -> 'b) -> 'a m -> 'b m
+  
+  val run : t -> 'a m -> (t * 'a)
+  
+  (* val set_proxy : ?user:string *)
+  (*   -> ?password:string *)
+  (*   -> host:string *)
+  (*   -> port:int *)
+  (*   -> unit m *)
+  
+  (** To use the monad operators, one needs to fix type mismatches for function
+      defined in module {! Agent}. For example, the return type of {! Agent.get}
+      is [type result = Agent.t response * string] while it should be [(response *
+      string) m = Agent.t * (response * string)] to be usable. These types
+      trivially isomorphic but not equal in Ocaml.
+  
+      For functions operating on the agent such as {! Agent.cookiejar} or {!
+      Agent.set_cookie_jar}, one needs to wrap their type to match the monad
+      constraint. For example, the first one go from [Agent.t -> Cookiejar.t] to
+      [Agent.t -> (Agent.t * Cookiejar.t) Lwt.t] by just returning the agent
+      unmodified together with the cookie jar, the whole result being wrapped in
+      Lwt.return
+  
+      Note that the redefined functions have the same name as their counterpart,
+      and thus will shadow or can be shadowed by them.
+  *)
+  
+  val save_content : string -> string -> unit m 
+  
+  val cookie_jar : Cookiejar.t m
+  val set_cookie_jar : Cookiejar.t -> unit m
+  val add_cookie : Cookiejar.Cookie.t -> unit m
+  val remove_cookie : Cookiejar.Cookie.t -> unit m
+  
+  val client_headers : Cohttp.Header.t m
+  val set_client_headers : Cohttp.Header.t -> unit m
+  val add_client_header : string -> string -> unit m
+  val remove_client_header : string -> unit m
+  
+  val set_max_redirect : int -> unit m
+end
