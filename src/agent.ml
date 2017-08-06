@@ -27,20 +27,36 @@ type http_status_code = Code.status_code
 type http_headers = Header.t
 
 module HttpResponse = struct
-  type t = Response.t * string 
+  type t = { 
+    location : Uri.t;
+    cohttp_response : Response.t;
+    content : string
+  }
 
-  let status (response,_) =
-    Response.status response
+  let location r = r.location
 
-  let headers (response,_) =
-    Response.headers response
+  let status r =
+    Response.status r.cohttp_response
 
-  let content = snd
+  let status_code r =
+    r.cohttp_response
+    |> Response.status
+    |> Code.code_of_status
 
-  let cohttp_response = fst
+  let headers r =
+    Response.headers r.cohttp_response
+
+  let content r = r.content
+
+  let page r =
+    content r
+    |> Page.from_string ~location:r.location
+
+  let cohttp_response r = r.cohttp_response
+
+  let make ~location ~cohttp_response ~content = {location; cohttp_response;
+    content}
 end
-
-type response = HttpResponse.t
 
 type proxy = {
   user : string option;
@@ -57,7 +73,7 @@ type t = {
   redirect : int
 }
 
-type result = t * HttpResponse.t 
+type result = t * HttpResponse.t
 
 let default_max_redirect = 5
 
@@ -68,30 +84,31 @@ let init ?(max_redirect = default_max_redirect) _ =
     max_redirect;
     redirect = 0}
 
-let rec redirect (agent,(response,content)) =
-  match Response.status response with
+let rec redirect (agent,r) =
+  match r |> HttpResponse.cohttp_response |> Response.status with
     | `Moved_permanently
     | `Found ->
-      (match Header.get (Response.headers response) "Location" with
+      (match Header.get (HttpResponse.headers r) "Location" with
         | Some loc ->
           { agent with redirect = succ agent.redirect}
           |> get loc
-        | None -> Lwt.return ({ agent with redirect = 0 },(response,content)) )
-    | _ -> Lwt.return ({ agent with redirect = 0 },(response,content))
+        | None -> Lwt.return ({ agent with redirect = 0 },r) )
+    | _ -> Lwt.return ({ agent with redirect = 0 },r)
 
-and update_agent uri agent (response,body) =
-  let headers = Response.headers response in
-  let agent = 
-    {agent with cookie_jar = 
-      Cookiejar.add_from_headers uri headers agent.cookie_jar}
+and update_agent location agent (cohttp_response,body) =
+  let headers = Response.headers cohttp_response in
+  let agent =
+    {agent with cookie_jar =
+      Cookiejar.add_from_headers location headers agent.cookie_jar}
   in
   body
   |> Cohttp_lwt_body.to_string
-  >>= (function content -> 
+  >>= (function content ->
     if agent.redirect < agent.max_redirect then
-      redirect (agent,(response,content))
+      redirect (agent, HttpResponse.make ~location ~cohttp_response ~content)
     else
-      Lwt.return ({ agent with redirect=0 },(response,content)))
+      Lwt.return ({ agent with redirect=0 }, HttpResponse.make ~location
+        ~cohttp_response ~content))
 
 and get_uri uri agent =
   let headers = agent.cookie_jar
@@ -114,7 +131,7 @@ let post uri_string content agent =
   post_uri (Uri.of_string uri_string) content agent
 
 let submit form agent =
-  let uri = Page.Form.action form in
+  let uri = Page.Form.uri form in
   let params = Page.Form.values form in
   let headers = agent.cookie_jar
     |> Cookiejar.add_to_headers uri agent.client_headers in
@@ -132,9 +149,9 @@ let save_image image file agent =
   let uri = Page.Image.uri image in
   agent
   |> get_uri uri
-  >>= (function (agent,(response,content)) ->
-    save_content file content
-    >|= fun _ -> (agent,(response,content)))
+  >>= (function (agent,response) ->
+    save_content file (HttpResponse.content response) 
+    >|= fun _ -> (agent,response))
 
 let code_of_status = Code.code_of_status
 
@@ -162,39 +179,41 @@ let set_max_redirect max_redirect agent = {agent with max_redirect }
 
 module Monad = struct
   type 'a m = t -> (t * 'a) Lwt.t
-  type result = response * string
 
   let bind (x : 'a m) (f : 'a -> 'b m) =
     fun agent ->
       Lwt.bind (x agent) (fun (agent,result) ->
         f result agent)
 
-  let (>>=) = bind
-
-  let (<<=) x f = f >>= x
-
-  let (>>) x y = x >>= (fun _ -> y)
-
-  let (<<) y x = x >> y
-
-  let return (x : 'a) = 
+  let return (x : 'a) =
     fun agent -> Lwt.return (agent,x)
+
+  let map (f : 'a -> 'b) (x : 'a m) =
+    bind x (function y ->
+      f y
+      |> return)
 
   let return_from_lwt (x : 'a Lwt.t) =
     fun agent ->
       Lwt.bind x (fun y ->
         Lwt.return (agent,y))
 
-  let map (f : 'a -> 'b) (x : 'a m) =
-    x >>= (function y ->
-      f y
-      |> return)
-
   let run (agent : t) (x : 'a m) =
     Lwt_main.run (x agent)
 
-  let (>|=) (x : 'a m) (f : 'a -> 'b) = x |> map f
-  let (<|=) f x = x |> map f
+  module Infix = struct
+    let (>>=) = bind
+
+    let (<<=) x f = f >>= x
+
+    let (>>) x y = x >>= (fun _ -> y)
+
+    let (<<) y x = x >> y
+
+    let (>|=) (x : 'a m) (f : 'a -> 'b) = x |> map f
+
+    let (<|=) f x = x |> map f
+  end
 
   let save_content data file =
     save_content data file
@@ -228,7 +247,7 @@ module Monad = struct
 
   let client_headers = monadic_get client_headers
 
-  let set_client_headers headers = 
+  let set_client_headers headers =
     set_client_headers headers
     |> monadic_set
 
