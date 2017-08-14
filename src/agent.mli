@@ -82,11 +82,11 @@ val post_uri : Uri.t -> string -> t -> result Lwt.t
 (** Submit a filled form *)
 val submit : Page.Form.t -> t -> result Lwt.t
 
-(** [save_image image "myfile.jpg" agent] load the image using [get], open
+(** [save_image "myfile.jpg" image agent] load the image using [get], open
    [myfile.jpg] and write the received content.  *)
-val save_image : Page.Image.t -> string -> t -> result Lwt.t
+val save_image : string -> Page.Image.t -> t -> result Lwt.t
 
-(** [save_content content "myfile.html"] write the specified content in a file
+(** [save_content "myfile.html" content] write the specified content in a file
   * using Lwt's asynchronous IO *)
 val save_content : string -> string -> unit Lwt.t
 
@@ -156,6 +156,14 @@ module Monad : sig
   val map : ('a -> 'b) -> 'a m -> 'b m
 
   val run : t -> 'a m -> (t * 'a)
+
+  val fail : exn -> 'a m
+  val fail_with : string -> 'a m
+
+  val catch : (unit -> 'a m) -> (exn -> 'a m) -> 'a m
+  val try_bind :
+    (unit -> 'a m) ->
+    ('a -> 'b m) -> (exn -> 'b m) -> 'b m
 
   module Infix : sig
     val (>>=) : 'a m -> ('a -> 'b m) -> 'b m
