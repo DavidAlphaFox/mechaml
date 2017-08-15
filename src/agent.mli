@@ -41,7 +41,7 @@ module HttpResponse : sig
   val status_code : t -> int
   val headers : t -> http_headers
   val content : t -> string
-  val page : t -> Page.t 
+  val page : t -> Page.t
   val location : t -> Uri.t
 
   val cohttp_response : t -> Cohttp.Response.t

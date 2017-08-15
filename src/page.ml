@@ -389,7 +389,7 @@ module Link = struct
 
   let href link = link.elt |> Soup.attribute "href" |> Soup.require
   let text link = Soup.leaf_text link.elt
-  let uri link = link |> href 
+  let uri link = link |> href
     |> Uri.of_string
     |> link.resolver
 
@@ -429,7 +429,7 @@ end
 (* end *)
 
 let forms_with selector p =
-  p.soup 
+  p.soup
   |> Soup.select (tag_selector "form" selector)
   |> Soup.filter (tag_filter "form")
   |> Soup.to_list
